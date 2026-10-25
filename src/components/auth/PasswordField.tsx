@@ -1,6 +1,7 @@
 /**
  * Password field with show/hide toggle and strength meter (REQ-A1).
  * Strength scoring: length ≥ 8, mixed case, digit, symbol.
+ * Pass `showStrength={false}` for sign-in screens (meter is for new passwords).
  */
 import { useMemo, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
@@ -13,6 +14,7 @@ export function PasswordField({
   id = 'password',
   hint,
   autoFocus,
+  showStrength = true,
 }: {
   label: string;
   value: string;
@@ -20,6 +22,7 @@ export function PasswordField({
   id?: string;
   hint?: string;
   autoFocus?: boolean;
+  showStrength?: boolean;
 }) {
   const [show, setShow] = useState(false);
   const strength = useMemo(() => scorePassword(value), [value]);
@@ -38,7 +41,7 @@ export function PasswordField({
           onChange={(e) => onChange(e.target.value)}
           autoComplete={hint === 'current' ? 'current-password' : 'new-password'}
           autoFocus={autoFocus}
-          aria-describedby={`${id}-strength`}
+          aria-describedby={showStrength ? `${id}-strength` : undefined}
           className="pr-10"
           placeholder="••••••••"
           required
@@ -54,28 +57,30 @@ export function PasswordField({
         </button>
       </div>
       {/* strength meter */}
-      <div id={`${id}-strength`} className="mt-1.5">
-        <div className="flex gap-1" aria-hidden="true">
-          {[0, 1, 2, 3].map((i) => (
-            <span
-              key={i}
-              className={`h-1 flex-1 rounded-full ${
-                i < strength.score
-                  ? strength.score <= 1 ? 'bg-red-400' : strength.score === 2 ? 'bg-amber-400' : strength.score === 3 ? 'bg-lime-500' : 'bg-green-500'
-                  : 'bg-gray-200 dark:bg-gray-700'
-              }`}
-            />
-          ))}
+      {showStrength && (
+        <div id={`${id}-strength`} className="mt-1.5">
+          <div className="flex gap-1" aria-hidden="true">
+            {[0, 1, 2, 3].map((i) => (
+              <span
+                key={i}
+                className={`h-1 flex-1 rounded-full ${
+                  i < strength.score
+                    ? strength.score <= 1 ? 'bg-red-400' : strength.score === 2 ? 'bg-amber-400' : strength.score === 3 ? 'bg-lime-500' : 'bg-green-500'
+                    : 'bg-gray-200 dark:bg-gray-700'
+                }`}
+              />
+            ))}
+          </div>
+          <p className={`text-xs mt-1 ${strength.score <= 2 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'}`} aria-live="polite">
+            {value.length === 0
+              ? 'Use at least 8 characters.'
+              : strength.label}
+          </p>
+          {strength.score < 4 && value.length > 0 && (
+            <p className="text-xs text-gray-400">{errors.join(' ')}</p>
+          )}
         </div>
-        <p className={`text-xs mt-1 ${strength.score <= 2 ? 'text-amber-600 dark:text-amber-400' : 'text-green-600 dark:text-green-400'}`} aria-live="polite">
-          {value.length === 0
-            ? 'Use at least 8 characters.'
-            : strength.label}
-        </p>
-        {strength.score < 4 && value.length > 0 && (
-          <p className="text-xs text-gray-400">{errors.join(' ')}</p>
-        )}
-      </div>
+      )}
     </div>
   );
 }

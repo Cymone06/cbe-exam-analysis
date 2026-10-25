@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Lock } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { AuthLayout, AuthErrorBox } from '@/components/auth/AuthLayout';
 import { Input } from '@/components/ui/Input';
+import { PasswordField } from '@/components/auth/PasswordField';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/auth/AuthContext';
 import { AuthError } from '@/services/auth';
@@ -50,14 +51,13 @@ export function Login() {
             leftIcon={<Mail size={15} />} placeholder="you@example.com" required
             aria-describedby="login-error"
           />
-          <Input
-            id="login-password" label="Password" type="password" autoComplete="current-password"
-            value={password} onChange={(e) => setPassword(e.target.value)}
-            leftIcon={<Lock size={15} />} placeholder="••••••••" required
+          <PasswordField
+            id="login-password" label="Password" onChange={setPassword}
+            value={password} hint="current" showStrength={false}
           />
         </div>
-        <div className="flex items-center justify-between mt-3 text-sm">
-          <label className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+        <div className="mt-3 space-y-1.5 text-sm">
+          <label className="flex w-fit items-center gap-2 text-gray-600 dark:text-gray-400">
             <input
               type="checkbox" checked={keep} onChange={(e) => setKeep(e.target.checked)}
               className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
@@ -65,9 +65,11 @@ export function Login() {
             />
             Keep me signed in on this device
           </label>
-          <Link to="/forgot-password" className="text-indigo-600 dark:text-indigo-400 hover:underline">
-            Forgot password?
-          </Link>
+          <div>
+            <Link to="/forgot-password" className="text-indigo-600 dark:text-indigo-400 hover:underline">
+              Forgot password?
+            </Link>
+          </div>
         </div>
         <Button type="submit" disabled={busy} className="w-full mt-5">
           {busy ? 'Signing in…' : 'Sign in'}
