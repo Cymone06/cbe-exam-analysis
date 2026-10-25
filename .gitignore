@@ -1,0 +1,21 @@
+# environment & secrets
+.env
+.env.*
+!.env.example
+
+# dependencies & build
+node_modules/
+dist/
+dist-ssr/
+
+# test artifacts
+test-results/
+playwright-report/
+.playwright/
+coverage/
+
+# editors / OS
+.vscode/
+.idea/
+.DS_Store
+*.local
