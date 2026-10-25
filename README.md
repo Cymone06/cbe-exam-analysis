@@ -111,11 +111,38 @@ double-checks the typed confirmation email, then deletes the user with
 `SUPABASE_SERVICE_ROLE_KEY` — which is injected by Supabase at runtime and must never be placed
 in the frontend `.env`. The Settings page calls it only after the user types their email.
 
-### 7. Deploy the app (Netlify/Vercel)
+### 7. Deploy the app to Vercel
 
-- Build command `npm run build`, publish directory `dist/`.
-- Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the host's environment settings.
-- SPA fallback is already handled by hash routing.
+The repo is Vercel-ready: `vercel.json` includes a SPA rewrite safety net, build command
+`npm run build` and publish directory `dist/` are auto-detected (Vite preset).
+
+1. **Push to GitHub** and import the repo on [vercel.com/new](https://vercel.com/new)
+   (Framework preset: **Vite**) — or run `npx vercel` in the project folder to deploy via CLI.
+2. **Environment variables** (Project → Settings → Environment Variables; add for
+   *Production*, *Preview* and *Development*):
+
+   | Key | Value |
+   |---|---|
+   | `VITE_SUPABASE_URL` | `https://YOUR-PROJECT-REF.supabase.co` |
+   | `VITE_SUPABASE_PUBLISHABLE_KEY` | your `sb_publishable_…` key |
+
+   They are read at **build time** — redeploy after changing them.
+3. **After the first deploy**, copy the production URL (e.g. `https://cbe-exam-analysis.vercel.app`)
+   and add it to Supabase → Authentication → URL Configuration → Redirect URLs:
+
+   ```
+   https://cbe-exam-analysis.vercel.app/**
+   ```
+
+   Also set it as the **Site URL** so email links point at production by default.
+   Keep `http://localhost:5173/**` and `http://localhost:4173/**` on the list for local dev.
+4. **Redeploy if needed** — the CSP meta tag is generated at build time from
+   `VITE_SUPABASE_URL`, so no manual CSP changes are required.
+
+Hash routing (`/#/login`, `/#/reset-password`) means users always hit `/`, so no extra
+rewrite is needed for the auth flow itself; `vercel.json` exists only as a safety net.
+The Edge Function `delete-account` is hosted by Supabase and called by URL, so it needs
+no Vercel config.
 
 ### 8. Backup and restore
 
